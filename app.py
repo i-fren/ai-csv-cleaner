@@ -99,15 +99,83 @@ section[data-testid="stSidebar"] h1, section[data-testid="stSidebar"] h3 { color
     border: 1px solid var(--border); border-radius: 18px; padding: 24px 16px; text-align: center;
 }
 .stat-glow .icon { font-size: 1.8rem; margin-bottom: 4px; }
-.stat-glow .num { font-size: 2.2rem; font-weight: 800; color: var(--cyan); margin: 4px 0; }
+.stat-glow .num { font-size: 2.2rem; font-weight: 800; color: var(--cyan); margin: 4px 0; text-shadow: 0 0 20px rgba(34,211,238,0.3); }
 .stat-glow .lbl { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
 .feat-card {
     background: var(--card); border: 1px solid var(--border); border-radius: 16px;
     padding: 24px; text-align: center; transition: all 0.3s ease;
 }
-.feat-card:hover { border-color: rgba(34,211,238,0.3); box-shadow: var(--glow-cyan); }
+.feat-card:hover { border-color: rgba(34,211,238,0.3); box-shadow: var(--glow-cyan); transform: translateY(-2px); }
 .feat-card h4 { color: var(--cyan) !important; margin: 8px 0 4px; }
 .divider { border: none; border-top: 1px solid rgba(34,211,238,0.08); margin: 1.5rem 0; }
+
+/* Glow animations */
+@keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 0 10px rgba(34,211,238,0.08), inset 0 0 20px rgba(34,211,238,0.02); }
+    50% { box-shadow: 0 0 30px rgba(34,211,238,0.15), inset 0 0 30px rgba(34,211,238,0.04); }
+}
+@keyframes float-up {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
+}
+@keyframes shimmer-text { to { background-position: 200% center; } }
+@keyframes rotate-bg { to { transform: rotate(360deg); } }
+@keyframes ring-spin { to { transform: rotate(360deg); transform-origin: 100px 100px; } }
+@keyframes ring-spin-rev { to { transform: rotate(-360deg); transform-origin: 100px 100px; } }
+@keyframes node-blink {
+    0%, 100% { opacity: 0.4; r: 3; }
+    50% { opacity: 1; r: 5; }
+}
+@keyframes line-pulse-anim {
+    0%, 100% { opacity: 0.2; }
+    50% { opacity: 0.8; }
+}
+@keyframes core-breathe {
+    0%, 100% { opacity: 0.6; transform: scale(1); transform-origin: 100px 100px; }
+    50% { opacity: 1; transform: scale(1.08); transform-origin: 100px 100px; }
+}
+@keyframes borderGlow {
+    0%, 100% { border-color: rgba(34,211,238,0.12); }
+    50% { border-color: rgba(34,211,238,0.35); }
+}
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+@keyframes scaleIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+}
+.stat-glow { animation: pulse-glow 4s ease-in-out infinite; }
+.stat-glow .icon { animation: float-up 3s ease-in-out infinite; }
+.ring-rotate { animation: ring-spin 30s linear infinite; }
+.ring-rotate-reverse { animation: ring-spin-rev 25s linear infinite; }
+.node-blink { animation: node-blink 2.5s ease-in-out infinite; }
+.line-pulse { animation: line-pulse-anim 2s ease-in-out infinite; }
+.core-pulse { animation: core-breathe 4s ease-in-out infinite; }
+.stDownloadButton > button { animation: borderGlow 3s ease-in-out infinite; }
+.main .block-container { animation: fadeInUp 0.6s ease-out; }
+[data-testid="stMetric"] { animation: scaleIn 0.4s ease-out both; }
+.js-plotly-plot { animation: scaleIn 0.6s ease-out 0.3s both; }
+.hero-box::before {
+    content: '';
+    position: absolute;
+    top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: conic-gradient(from 0deg, transparent, rgba(34,211,238,0.03), transparent, rgba(96,165,250,0.03), transparent);
+    animation: rotate-bg 20s linear infinite;
+}
+.hero-title {
+    background-size: 200% auto;
+    animation: shimmer-text 4s linear infinite;
+}
+.ai-orb-container {
+    position: relative;
+    filter: drop-shadow(0 0 30px rgba(34,211,238,0.15));
+}
+@media (max-width: 768px) {
+    .ai-orb-container { display: none !important; }
+}
 .footer-bar {
     position: fixed; bottom: 0; left: 0; right: 0; z-index: 999;
     background: rgba(15,23,42,0.9); backdrop-filter: blur(12px);
@@ -469,17 +537,48 @@ with st.sidebar:
 if st.session_state.raw_df is None:
     # ── LANDING PAGE ──
     st.markdown("""
-    <div class="hero-box">
-        <div class="hero-badge">⚡ AI POWERED</div>
-        <div class="hero-title">DataForge AI</div>
-        <p style="color: #94a3b8; font-size: 1.2rem; margin-top: 8px;">
-            Next-Gen Smart CSV Cleaning & Analytics Platform
-        </p>
-        <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin-top:20px;">
-            <span class="hero-badge">🧹 Clean Data</span>
-            <span class="hero-badge">💡 AI Insights</span>
-            <span class="hero-badge">📊 Analytics</span>
-            <span class="hero-badge">💬 Chat</span>
+    <div class="hero-box" style="text-align:left; display:flex; align-items:center; justify-content:space-between; gap:40px; flex-wrap:wrap; position:relative; overflow:hidden;">
+        <div style="flex:1; min-width:280px; position:relative; z-index:1;">
+            <div class="hero-badge">⚡ AI POWERED</div>
+            <div class="hero-title" style="text-align:left;">DataForge AI</div>
+            <p style="color: #94a3b8; font-size: 1.2rem; margin-top: 8px; text-align:left;">
+                Next-Gen Smart CSV Cleaning & Analytics Platform
+            </p>
+            <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:20px;">
+                <span class="hero-badge" style="margin:0">🧹 Clean Data</span>
+                <span class="hero-badge" style="margin:0">💡 AI Insights</span>
+                <span class="hero-badge" style="margin:0">📊 Analytics</span>
+                <span class="hero-badge" style="margin:0">💬 Chat</span>
+            </div>
+        </div>
+        <div style="flex:0 0 280px; display:flex; align-items:center; justify-content:center;">
+            <div class="ai-orb-container">
+                <svg viewBox="0 0 200 200" width="260" height="260" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="100" cy="100" r="90" fill="none" stroke="rgba(34,211,238,0.15)" stroke-width="1" stroke-dasharray="4 6" class="ring-rotate"/>
+                    <circle cx="100" cy="100" r="75" fill="none" stroke="rgba(96,165,250,0.12)" stroke-width="1" stroke-dasharray="3 8" class="ring-rotate-reverse"/>
+                    <circle cx="100" cy="100" r="45" fill="url(#coreGrad)" class="core-pulse"/>
+                    <circle cx="100" cy="100" r="30" fill="rgba(34,211,238,0.08)" class="core-pulse" style="animation-delay:0.5s"/>
+                    <circle cx="100" cy="30" r="4" fill="#22D3EE" class="node-blink"/>
+                    <circle cx="160" cy="70" r="3.5" fill="#60A5FA" class="node-blink" style="animation-delay:0.3s"/>
+                    <circle cx="160" cy="130" r="3" fill="#22D3EE" class="node-blink" style="animation-delay:0.6s"/>
+                    <circle cx="100" cy="170" r="4" fill="#60A5FA" class="node-blink" style="animation-delay:0.9s"/>
+                    <circle cx="40" cy="130" r="3.5" fill="#22D3EE" class="node-blink" style="animation-delay:1.2s"/>
+                    <circle cx="40" cy="70" r="3" fill="#60A5FA" class="node-blink" style="animation-delay:1.5s"/>
+                    <line x1="100" y1="30" x2="100" y2="55" stroke="rgba(34,211,238,0.3)" stroke-width="0.8" class="line-pulse"/>
+                    <line x1="160" y1="70" x2="135" y2="85" stroke="rgba(96,165,250,0.3)" stroke-width="0.8" class="line-pulse" style="animation-delay:0.4s"/>
+                    <line x1="160" y1="130" x2="135" y2="115" stroke="rgba(34,211,238,0.3)" stroke-width="0.8" class="line-pulse" style="animation-delay:0.8s"/>
+                    <line x1="100" y1="170" x2="100" y2="145" stroke="rgba(96,165,250,0.3)" stroke-width="0.8" class="line-pulse" style="animation-delay:1.2s"/>
+                    <line x1="40" y1="130" x2="65" y2="115" stroke="rgba(34,211,238,0.3)" stroke-width="0.8" class="line-pulse" style="animation-delay:1.6s"/>
+                    <line x1="40" y1="70" x2="65" y2="85" stroke="rgba(96,165,250,0.3)" stroke-width="0.8" class="line-pulse" style="animation-delay:2s"/>
+                    <text x="100" y="106" text-anchor="middle" font-size="24" fill="#22D3EE" class="core-pulse">⚡</text>
+                    <defs>
+                        <radialGradient id="coreGrad" cx="50%" cy="50%" r="50%">
+                            <stop offset="0%" stop-color="rgba(34,211,238,0.2)"/>
+                            <stop offset="100%" stop-color="rgba(34,211,238,0)"/>
+                        </radialGradient>
+                    </defs>
+                </svg>
+            </div>
         </div>
     </div>
     """, unsafe_allow_html=True)
