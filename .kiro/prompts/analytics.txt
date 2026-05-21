@@ -1,0 +1,54 @@
+PROMPT: Analytics & Statistics Engine for DataDoctor AI
+
+Context: Computing summary statistics and correlations for CSV datasets using Pandas.
+
+Requirements:
+1. Summary Statistics:
+   - Numeric columns: count, mean, median, std, min, max, p25, p75
+   - Text columns: count, unique, top (most frequent value), top_freq
+   - Compute for both raw and cleaned datasets
+   - Label each column with its inferred type
+
+2. Correlation Analysis:
+   - Compute Pearson correlation matrix for numeric columns
+   - Extract upper triangle pairs (avoid duplicates)
+   - Sort by absolute value descending
+   - Return top N (default 5) with descriptions
+   - Description format: "{col_a} and {col_b} are {strength} {direction} correlated (r = {value})"
+   - Strength: strongly (|r| >= 0.7), moderately (|r| >= 0.4), weakly (|r| < 0.4)
+
+3. Type Inference:
+   - "numeric" if pd.api.types.is_numeric_dtype
+   - "date" if >50% of non-null values parse as dates
+   - "text" otherwise
+
+Implementation Pattern:
+```python
+def compute_stats(df: pd.DataFrame, inferred_types: dict[str, str]) -> dict:
+    result = {}
+    for col in df.columns:
+        col_type = inferred_types.get(col, "text")
+        if col_type == "numeric" and pd.api.types.is_numeric_dtype(df[col]):
+            non_null = df[col].dropna()
+            result[col] = {
+                "type": "numeric",
+                "count": int(series.count()),
+                "mean": float(non_null.mean()),
+                # ... etc
+            }
+        else:
+            # Text stats
+    return result
+```
+
+Edge Cases:
+- Empty DataFrames → return empty dict
+- All-null columns → return 0 for all numeric stats
+- Single-value columns → std = 0
+- No numeric columns → empty correlation list
+
+Correctness Properties:
+- min <= p25 <= median <= p75 <= max (always)
+- mean equals arithmetic mean of non-null values
+- std equals standard deviation of non-null values
+- Top correlations are sorted by |correlation| descending

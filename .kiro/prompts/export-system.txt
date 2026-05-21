@@ -1,0 +1,51 @@
+PROMPT: Export System for DataDoctor AI
+
+Context: Implementing CSV and PDF export functionality for a data cleaning application.
+
+Requirements:
+1. CSV Export:
+   - Serialize cleaned DataFrame to CSV bytes via df.to_csv(index=False)
+   - Return as StreamingResponse with media_type="text/csv"
+   - Filename: "cleaned_{original_filename}"
+   - Content-Disposition: attachment header for browser download
+
+2. PDF Report Export:
+   - Generate using ReportLab (pure Python, no system deps)
+   - Include 4 sections:
+     a. Data Quality Metrics (rows, duplicates, missing, outliers)
+     b. Summary Statistics (numeric + text columns)
+     c. AI Insights (summary, correlations, suggestions)
+     d. ML Model Comparison (metrics table, feature importance)
+   - Professional styling with colored table headers
+   - Filename: "insights_report_{original_filename}.pdf"
+
+3. Frontend Integration:
+   - Download buttons render only when sessionId is non-null
+   - Use anchor tags with href pointing to export URLs
+   - Styled as cards with icons and descriptions
+   - Proper aria-labels for accessibility
+
+Backend Pattern:
+```python
+@router.get("/sessions/{session_id}/export/csv")
+async def export_csv(session_id: str):
+    session = session_store.get(session_id)
+    csv_bytes = session.cleaned_df.to_csv(index=False).encode("utf-8")
+    return StreamingResponse(
+        io.BytesIO(csv_bytes),
+        media_type="text/csv",
+        headers={"Content-Disposition": f'attachment; filename="cleaned_{session.filename}"'},
+    )
+```
+
+Frontend Pattern:
+```typescript
+export function exportCsvUrl(sessionId: string): string {
+  return `${BASE_URL}/sessions/${sessionId}/export/csv`;
+}
+```
+
+Error Handling:
+- Session not found → HTTP 404
+- PDF generation failure → HTTP 500 with "Failed to generate the insights report."
+- Frontend shows disabled state when no session exists

@@ -1,0 +1,16 @@
+[Unit]
+Description=DataDoctor AI FastAPI Backend
+After=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/datadoctor
+Environment="PATH=/home/ubuntu/datadoctor/venv/bin"
+Environment="OPENAI_API_KEY=your_openai_key_here"
+ExecStart=/home/ubuntu/datadoctor/venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 1
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,52 @@
+PROMPT: AI Insights Generation for DataDoctor AI
+
+Context: Using OpenAI gpt-4o-mini to generate natural language insights about CSV datasets.
+
+Requirements:
+1. Insights Generation:
+   - Input: dataset shape, column names, inferred types, top correlations, cleaning audit trail
+   - Output: summary (2-3 sentences), temporal_trends (nullable), quality_suggestions (>= 3 items)
+   - Must complete within 30 seconds
+   - Must have fallback when OpenAI is unavailable
+
+2. Fill Strategy Suggestion:
+   - Input: column name, dtype, missing count, sample values
+   - Output: suggested_method (mean|median|mode|forward_fill|drop_rows), rationale
+   - Must always return a valid strategy
+
+3. Chat with Data:
+   - Input: user question + dataset context (shape, columns, sample data, stats)
+   - Output: natural language answer about the dataset
+   - Conversational tone, data-focused responses
+
+Prompt Engineering Pattern:
+```python
+prompt = (
+    "You are a data analyst. Analyze this dataset:\n"
+    f"- Shape: {shape_info}\n"
+    f"- Columns: {col_info}\n"
+    f"- Cleaning applied: {audit}\n"
+    f"- {corr_text}\n\n"
+    "Respond with a JSON object with these exact keys:\n"
+    '{"summary": "...", "temporal_trends": "...", "quality_suggestions": ["...", "...", "..."]}'
+)
+```
+
+Fallback Strategy:
+- When OpenAI fails or key is missing:
+  - Insights: Return generic summary based on dataset shape
+  - Fill suggestion: Use heuristic (numeric → median, text → mode)
+  - Chat: Return "AI service unavailable" message
+- Never raise an unhandled exception to the user
+
+Error Handling:
+- Parse JSON from response, strip markdown code fences if present
+- Validate suggested_method is in the allowed set
+- Ensure quality_suggestions has >= 3 items (pad with defaults if needed)
+- Return HTTP 502 on API failure with user-friendly message
+
+OpenAI Configuration:
+- Model: gpt-4o-mini
+- Temperature: 0 for suggestions, 0.3 for insights, 0.5 for chat
+- Max tokens: 150 for suggestions, 500 for insights, 300 for chat
+- No streaming (wait for complete response)

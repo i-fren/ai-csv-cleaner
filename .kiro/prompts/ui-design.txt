@@ -1,0 +1,57 @@
+PROMPT: UI Component Design for DataDoctor AI
+
+Context: Building a dark-themed data analytics dashboard with React + TypeScript + Tailwind CSS.
+
+Design Requirements:
+- Dark background (#0a0a1a) with glass-morphism cards (bg-white/5, border-white/10)
+- Blue-to-purple gradient accents for primary actions
+- Smooth transitions (200ms duration) on all interactive elements
+- Responsive layout: single column mobile, multi-column desktop (lg:)
+- All interactive elements must have aria-label attributes
+- Loading states with animated spinners for async operations
+- Error states with dismissible banners (role="alert")
+- Data tables with horizontal scroll on mobile, proper th scope="col"
+
+Component Pattern:
+```tsx
+interface Props {
+  sessionId: string;
+  data: DataType;
+  onAction: (result: ResultType) => void;
+}
+
+export function ComponentName({ sessionId, data, onAction }: Props) {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleAction = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const result = await apiCall(sessionId);
+      onAction(result);
+    } catch (err: any) {
+      setError(err.response?.data?.detail || 'An error occurred');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="rounded-2xl bg-white/5 border border-white/10 p-6">
+      {error && <ErrorBanner message={error} onDismiss={() => setError(null)} />}
+      {loading && <LoadingSpinner />}
+      {/* Component content */}
+    </div>
+  );
+}
+```
+
+Styling Tokens:
+- Cards: rounded-2xl bg-white/5 border border-white/10 p-6
+- Primary button: px-5 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 text-white font-medium
+- Secondary button: px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-gray-300
+- Input: bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white
+- Heading: text-xl font-bold text-white
+- Body text: text-sm text-gray-400
+- Metric value: text-2xl font-bold text-white
